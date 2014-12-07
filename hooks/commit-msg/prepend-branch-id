@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+
+var fs = require('fs');
+var exec = require('child_process').exec;
+
+var commit_message_path = process.argv[2];
+fs.readFile( commit_message_path, function( err, contents ){
+	if( err ) throw err;
+	var commit_message = contents.toString();
+	exec( 'git symbolic-ref -q HEAD', function( err, branch_path ){
+		if( err ) throw err;
+		var branch_id = (/\/([^\/-]*)-[^\/]*$/.exec( branch_path ) || [] )[1];
+		if( branch_id ){
+			fs.writeFile( '['+ commit_message_path, branch_id +'] '+ commit_message, function( err ){
+				if( err ) throw err;
+			});
+		}
+	});
+});
